@@ -41,7 +41,6 @@ This is a Verilog implementation of a single-cycle MIPS processor based on the d
 │ └──────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────┘
 
-
 ## Implementation Details
 
 ### 1. Instruction Format Support
