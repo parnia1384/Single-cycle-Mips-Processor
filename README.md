@@ -164,12 +164,86 @@ flowchart TD
     class RF,ALU,ALU_CTRL,RF_Write,A,B exec
 ```
 #### I-Type Instructions (Immediate)
-31-26 25-21 20-16 15-0
-┌───────┬───────┬───────┬──────────────┐
-│ op │ rs │ rt │ immediate │
-└───────┴───────┴───────┴──────────────┘
-6-bit 5-bit 5-bit 16-bit
-
+```mermaid
+flowchart TD
+    subgraph "I-Type Instruction Format"
+        direction LR
+        subgraph I_bit31_26["31:26 (6 bits)"]
+            I_op["Opcode<br/>Varies by instruction"]
+        end
+        
+        subgraph I_bit25_21["25:21 (5 bits)"]
+            I_rs["rs<br/>Base Register"]
+        end
+        
+        subgraph I_bit20_16["20:16 (5 bits)"]
+            I_rt["rt<br/>Target Register"]
+        end
+        
+        subgraph I_bit15_0["15:0 (16 bits)"]
+            I_imm["immediate<br/>Constant Value"]
+        end
+        
+        I_op --> I_rs --> I_rt --> I_imm
+    end
+    
+    subgraph "I-Type Categories"
+        direction TB
+        subgraph "Memory Access"
+            LW["lw $rt, offset($rs)<br/>op=100011<br/>Load Word"]
+            SW["sw $rt, offset($rs)<br/>op=101011<br/>Store Word"]
+        end
+        
+        subgraph "Arithmetic/Logical"
+            ADDI["addi $rt, $rs, imm<br/>op=001000<br/>Add Immediate"]
+            ANDI["andi $rt, $rs, imm<br/>op=001100<br/>And Immediate"]
+            ORI["ori $rt, $rs, imm<br/>op=001101<br/>Or Immediate"]
+            SLTI["slti $rt, $rs, imm<br/>op=001010<br/>Set Less Than Immediate"]
+        end
+        
+        subgraph "Control Flow"
+            BEQ["beq $rs, $rt, label<br/>op=000100<br/>Branch if Equal"]
+            BNE["bne $rs, $rt, label<br/>op=000101<br/>Branch if Not Equal"]
+        end
+    end
+    
+    subgraph "I-Type Execution"
+        RF_I["Register File"] -->|Read $rs| RS_Val
+        I_rs --> RF_I
+        RS_Val --> ALU_I["ALU"]
+        
+        I_imm --> SE["Sign Extend<br/>16-bit → 32-bit"]
+        SE --> MUX_I["ALUSrc Mux"]
+        RF_I -->|Read $rt| RT_Val
+        RT_Val --> MUX_I
+        MUX_I -->|imm or $rt| ALU_I
+        
+        ALU_I --> DM_I["Data Memory"]
+        ALU_I --> WB_I["Write Back"]
+        DM_I --> WB_I
+        WB_I -->|Write Data| RF_I_Write["Write to $rt"]
+        I_rt --> RF_I_Write
+    end
+    
+    subgraph "Sign Extension Process"
+        direction LR
+        Imm16["16-bit immediate"] --> SE_Process["Sign Bit: imm[15]"]
+        SE_Process -->|Replicate| Upper16["imm[15] repeated 16 times"]
+        Imm16 --> Lower16["imm[15:0] as is"]
+        Upper16 --> Result["32-bit result:<br/>Upper16 || Lower16"]
+    end
+    
+    %% Styling
+    classDef itype fill:#fff3e0,stroke:#ef6c00
+    classDef category fill:#fce4ec,stroke:#ad1457
+    classDef exec fill:#e8f5e8,stroke:#388e3c
+    classDef se fill:#e3f2fd,stroke:#0277bd
+    
+    class I_op,I_rs,I_rt,I_imm itype
+    class LW,SW,ADDI,ANDI,ORI,SLTI,BEQ,BNE category
+    class RF_I,ALU_I,SE,MUX_I,DM_I,WB_I,RF_I_Write,RS_Val,RT_Val exec
+    class Imm16,SE_Process,Upper16,Lower16,Result se
+```
 ### 2. Instruction Set
 
 | Instruction | Format | Opcode | Funct | Operation |
