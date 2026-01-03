@@ -19,14 +19,84 @@ This is a Verilog implementation of a single-cycle MIPS processor based on the d
 
 ## Block Diagram
 ```mermaid
-graph TD
-    PC[Program Counter] --> IM[Instruction Memory]
-    IM --> CU[Control Unit]
-    IM --> RF[Register File]
-    CU --> ALU[ALU Control]
+flowchart TD
+    subgraph "Data Path"
+        PC["PC<br/>Program Counter"]
+        ADD4["Adder<br/>PC + 4"]
+        IM["IM<br/>Instruction Memory"]
+        RF["RF<br/>Register File<br/>(32 x 32-bit)"]
+        ALU["ALU<br/>Arithmetic Logic Unit"]
+        DM["DM<br/>Data Memory"]
+        SE["Sign Extend<br/>16→32 bits"]
+        SHL2["Shift Left 2"]
+    end
+    
+    subgraph "Control Path"
+        CU["Control Unit"]
+        ALU_Ctrl["ALU Control"]
+        PC_Src["PC Source Logic"]
+    end
+    
+    subgraph "Multiplexers"
+        MUX_ALUSrc["MUX<br/>ALUSrc"]
+        MUX_RegDst["MUX<br/>RegDst"]
+        MUX_MemtoReg["MUX<br/>MemtoReg"]
+        MUX_PCSrc["MUX<br/>PCSrc"]
+    end
+    
+    %% Main Flow
+    PC --> IM
+    IM --> CU
+    IM --> RF
+    IM --> SE
+    IM --> MUX_RegDst
+    
+    %% Register File Flow
     RF --> ALU
-    ALU --> DM[Data Memory]
-    DM --> RF
+    RF --> MUX_ALUSrc
+    
+    %% ALU Flow
+    SE --> MUX_ALUSrc
+    CU --> MUX_ALUSrc
+    MUX_ALUSrc --> ALU
+    CU --> ALU_Ctrl
+    ALU_Ctrl --> ALU
+    ALU --> DM
+    ALU --> MUX_MemtoReg
+    
+    %% Memory Flow
+    CU --> DM
+    DM --> MUX_MemtoReg
+    
+    %% Write Back Flow
+    CU --> MUX_MemtoReg
+    MUX_MemtoReg --> RF
+    CU --> MUX_RegDst
+    MUX_RegDst --> RF
+    CU -- RegWrite --> RF
+    
+    %% PC Update Flow
+    PC --> ADD4
+    ADD4 --> MUX_PCSrc
+    SE --> SHL2
+    SHL2 --> ADD_Branch["Adder<br/>PC+4 + offset"]
+    ADD4 --> ADD_Branch
+    ADD_Branch --> MUX_PCSrc
+    IM --> Jump_Calc["Jump Address<br/>{PC[31:28], addr, 00}"]
+    Jump_Calc --> MUX_PCSrc
+    CU --> PC_Src
+    ALU -- Zero Flag --> PC_Src
+    PC_Src --> MUX_PCSrc
+    MUX_PCSrc --> PC
+    
+    %% Styling
+    classDef dataPath fill:#e1f5fe,stroke:#01579b
+    classDef controlPath fill:#f3e5f5,stroke:#4a148c
+    classDef mux fill:#fff3e0,stroke:#e65100
+    
+    class PC,IM,RF,ALU,DM,SE,SHL2,ADD4,ADD_Branch,Jump_Calc dataPath
+    class CU,ALU_Ctrl,PC_Src controlPath
+    class MUX_ALUSrc,MUX_RegDst,MUX_MemtoReg,MUX_PCSrc mux
 ```
 ## Implementation Details
 
