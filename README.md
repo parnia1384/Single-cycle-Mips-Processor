@@ -103,12 +103,66 @@ flowchart TD
 ### 1. Instruction Format Support
 
 #### R-Type Instructions (Register)
-31-26 25-21 20-16 15-11 10-6 5-0
-┌───────┬───────┬───────┬───────┬───────┬───────┐
-│ op │ rs │ rt │ rd │ shamt │ funct │
-└───────┴───────┴───────┴───────┴───────┴───────┘
-6-bit 5-bit 5-bit 5-bit 5-bit 6-bit
-
+```mermaid
+flowchart TD
+    subgraph "R-Type Instruction Format"
+        direction LR
+        subgraph bit31_26["31:26 (6 bits)"]
+            op["Opcode<br/>000000"]
+        end
+        
+        subgraph bit25_21["25:21 (5 bits)"]
+            rs["rs<br/>Source Register"]
+        end
+        
+        subgraph bit20_16["20:16 (5 bits)"]
+            rt["rt<br/>Target Register"]
+        end
+        
+        subgraph bit15_11["15:11 (5 bits)"]
+            rd["rd<br/>Destination Register"]
+        end
+        
+        subgraph bit10_6["10:6 (5 bits)"]
+            shamt["shamt<br/>Shift Amount<br/>(00000 for ALU)"]
+        end
+        
+        subgraph bit5_0["5:0 (6 bits)"]
+            funct["funct<br/>Function Code"]
+        end
+        
+        op --> rs --> rt --> rd --> shamt --> funct
+    end
+    
+    subgraph "R-Type Examples"
+        direction TB
+        ADD["add $rd, $rs, $rt<br/>op=000000, funct=100000"]
+        SUB["sub $rd, $rs, $rt<br/>op=000000, funct=100010"]
+        AND["and $rd, $rs, $rt<br/>op=000000, funct=100100"]
+        OR["or $rd, $rs, $rt<br/>op=000000, funct=100101"]
+        SLT["slt $rd, $rs, $rt<br/>op=000000, funct=101010"]
+    end
+    
+    subgraph "Execution Flow"
+        RF["Register File"] -->|Read $rs| A
+        RF -->|Read $rt| B
+        A --> ALU["ALU<br/>Performs operation"]
+        B --> ALU
+        funct --> ALU_CTRL["ALU Control"]
+        ALU_CTRL --> ALU
+        ALU -->|Result| RF_Write["Write to $rd"]
+        rd --> RF_Write
+    end
+    
+    %% Styling
+    classDef rtype fill:#e8f5e8,stroke:#2e7d32
+    classDef example fill:#f3e5f5,stroke:#7b1fa2
+    classDef exec fill:#e3f2fd,stroke:#1565c0
+    
+    class op,rs,rt,rd,shamt,funct rtype
+    class ADD,SUB,AND,OR,SLT example
+    class RF,ALU,ALU_CTRL,RF_Write,A,B exec
+```
 #### I-Type Instructions (Immediate)
 31-26 25-21 20-16 15-0
 ┌───────┬───────┬───────┬──────────────┐
