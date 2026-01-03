@@ -9,7 +9,6 @@ This is a Verilog implementation of a single-cycle MIPS processor based on the d
 - **Supported instruction types**:
   - R-type: ADD, SUB, AND, OR, SLT
   - I-type: ADDI, ANDI, ORI, SLTI, LW, SW, BEQ, BNE
-  - J-type: J
 - **Memory-mapped I/O** support
 - **Five-stage pipeline conceptually implemented in single cycle**:
   1. Instruction Fetch (IF)
