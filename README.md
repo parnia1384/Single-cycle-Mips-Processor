@@ -18,29 +18,16 @@ This is a Verilog implementation of a single-cycle MIPS processor based on the d
   5. Write Back (WB)
 
 ## Block Diagram
-┌─────────────────────────────────────────────────────────────────────┐
-│                   SINGLE-CYCLE MIPS PROCESSOR                       |
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│    ┌──────┐     ┌─────────────┐     ┌──────────┐     ┌──────────┐   │
-│    │      │     │             │     │          │     │          │   │
-│    │  PC  │────▶│ INSTRUCTION │────▶│ CONTROL  │────▶│   ALU   │  │
-│    │      │     │   MEMORY    │     │   UNIT   │     │          │   │
-│    └──┬───┘     └──────┬──────┘     └─────┬────┘     └────┬─────┘   │
-│       │                │                   │               │        │
-│       ▼                ▼                   │               ▼        │
-│    ┌──────┐        ┌──────┐            ┌──▼───┐        ┌──────┐     │
-│    │      │        │      │            │      │        │      │     │
-│    │ ADD  │◀──────▶│REG   │◀───────────│SIGN  │◀──────▶│DATA│    │
-│    │ +4   │        │FILE  │            │EXTEND│        │MEMORY│     │
-│    │      │        │      │            │      │        │      │     │
-│    └──────┘        └──────┘            └──────┘        └──────┘     │
-│                                                                     │
-│                   ┌────────────────────┐                            │
-│                   │   NEXT PC LOGIC    │                            │
-│                   └────────────────────┘                            │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    PC[Program Counter] --> IM[Instruction Memory]
+    IM --> CU[Control Unit]
+    IM --> RF[Register File]
+    CU --> ALU[ALU Control]
+    RF --> ALU
+    ALU --> DM[Data Memory]
+    DM --> RF
+```
 ## Implementation Details
 
 ### 1. Instruction Format Support
