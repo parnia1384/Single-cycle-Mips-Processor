@@ -48,20 +48,16 @@ This is a Verilog implementation of a single-cycle MIPS processor based on the d
 
 #### R-Type Instructions (Register)
 31-26 25-21 20-16 15-11 10-6 5-0
-
 ┌───────┬───────┬───────┬───────┬───────┬───────┐
 │ op │ rs │ rt │ rd │ shamt │ funct │
 └───────┴───────┴───────┴───────┴───────┴───────┘
-
 6-bit 5-bit 5-bit 5-bit 5-bit 6-bit
 
 #### I-Type Instructions (Immediate)
 31-26 25-21 20-16 15-0
-
 ┌───────┬───────┬───────┬──────────────┐
 │ op │ rs │ rt │ immediate │
 └───────┴───────┴───────┴──────────────┘
-
 6-bit 5-bit 5-bit 16-bit
 
 ### 2. Instruction Set
